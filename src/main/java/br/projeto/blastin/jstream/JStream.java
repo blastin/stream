@@ -60,7 +60,7 @@ public final class JStream<T> {
 
     }
 
-    public JStream<T> filtro(final Predicado<T> predicado) {
+    public JStream<T> filtro(final Predicado<? super T> predicado) {
 
         if (presente()) {
             return filtrar(predicado);
@@ -123,14 +123,14 @@ public final class JStream<T> {
     }
 
     public boolean peloMenosUmCombina(final Predicado<? super T> predicado) {
-        return combinacao(predicado, integer -> integer > 0);
+        return combinacoes(predicado, integer -> integer > 0);
     }
 
     public boolean todosCombinam(final Predicado<? super T> predicado) {
-        return combinacao(predicado, integer -> integer == tamanho);
+        return combinacoes(predicado, integer -> integer == tamanho);
     }
 
-    private boolean combinacao(final Predicado<? super T> predicado, final Predicado<Integer> predicadoCombinacao) {
+    private boolean combinacoes(final Predicado<? super T> predicado, final Predicado<Integer> predicadoCombinacao) {
 
         Objects.requireNonNull(predicado);
 
