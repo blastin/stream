@@ -13,4 +13,4 @@ jobs:
           java-version: 14
           architecture: x64
       - name: Testar
-        run: ./mvnw clean test
+        run: mvn clean test
