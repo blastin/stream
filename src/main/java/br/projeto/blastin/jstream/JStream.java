@@ -186,7 +186,6 @@ public final class JStream<T> {
         int quantidade = 0;
 
         for (int i = 0; i < tamanho; i++) {
-
             if (predicado.teste(ts[i])) quantidade++;
         }
 

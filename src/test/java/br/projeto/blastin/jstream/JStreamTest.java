@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 class JStreamTest {
@@ -219,7 +221,6 @@ class JStreamTest {
 
     }
 
-
     @Test
     void todosNaoCombinam() {
 
@@ -305,7 +306,6 @@ class JStreamTest {
 
     }
 
-
     @Test
     void colecaoInteiroParaStream() {
 
@@ -314,6 +314,7 @@ class JStreamTest {
         final Class<? extends Integer> inteiroClass =
                 JStream
                         .de(inteiros)
+                        .filtro(integer -> integer > 1)
                         .primeiroValor()
                         .ouExcessao(RuntimeException::new)
                         .obter()
@@ -322,4 +323,65 @@ class JStreamTest {
         Assertions.assertEquals(Integer.class, inteiroClass);
 
     }
+
+    @Test
+    void excecaoPorStreamVazia() {
+
+        final List<Integer> inteiros = List.of(1, 2);
+
+        //noinspection ResultOfMethodCallIgnored
+        Assertions
+                .assertThrows(
+                        NoSuchElementException.class,
+                        JStream
+                                .de(inteiros)
+                                .filtro(integer -> integer > 2)
+                                .primeiroValor()::obter
+                );
+
+    }
+
+    @Test
+    void naoPresenteRealizaUmaAcao() {
+
+        final AtomicBoolean status = new AtomicBoolean(false);
+
+        JStream
+                .de(1.0, 2.0, 3.0, 4.0, 5.0, 5.5, 6.0)
+                .filtro(aDouble -> aDouble > 3.0)
+                .mapeamento(Double::intValue)
+                .filtro(integer -> integer > 5)
+                .mapeamento(Integer::doubleValue)
+                .filtro(aDouble -> aDouble > 6.0)
+                .mapeamento(String::valueOf)
+                .primeiroValor()
+                .seNaoPresente(() -> status.set(true))
+                .sePresente(s -> status.set(false));
+
+        Assertions
+                .assertTrue(status.get());
+
+    }
+
+    @Test
+    void presenteRealizaUmaAcao() {
+
+        final AtomicBoolean status = new AtomicBoolean(false);
+
+        final List<Double> numeros = List.of(1.0, 2.0, 3.0, 4.0, 5.0, 5.5, 6.0);
+
+        JStream
+                .de(numeros)
+                .filtro(aDouble -> aDouble > 3.0)
+                .mapeamento(Double::intValue)
+                .filtro(integer -> integer > 5)
+                .reducao(Integer::sum)
+                .seNaoPresente(() -> status.set(false))
+                .sePresente(s -> status.set(s.equals(6)));
+
+        Assertions
+                .assertTrue(status.get());
+
+    }
+
 }
