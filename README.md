@@ -1,2 +1,3 @@
 # stream
-Rewriting of the Java Programming Language Stream library
+
+Rewrite of the stream library found in the java programming language 
