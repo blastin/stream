@@ -19,19 +19,19 @@ import java.util.stream.Collector;
 public final class JStreams<T> implements JStream<T> {
 
     public static <T> JStream<T> de(final T t) {
-        return new JStreams<>(t);
+        return new JStreamProxy<>(new JStreams<>(t));
     }
 
     @SafeVarargs
     public static <T> JStream<T> de(final T... t) {
-        return new JStreams<>(t, t.length);
+        return new JStreamProxy<>(new JStreams<>(t, t.length));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> JStream<T> de(final Collection<T> colecao) {
         Objects.requireNonNull(colecao);
         final T[] ts = (T[]) colecao.toArray();
-        return new JStreams<>(ts, ts.length);
+        return new JStreamProxy<>(new JStreams<>(ts, ts.length));
     }
 
     @SuppressWarnings("unchecked")
@@ -39,7 +39,7 @@ public final class JStreams<T> implements JStream<T> {
         return (JStream<T>) JStreams.JSTREAM_NULO;
     }
 
-    private static final JStream<?> JSTREAM_NULO = new JStreams<>(null);
+    private static final JStream<?> JSTREAM_NULO = new JStreamProxy<>(new JStreams<>(null));
 
     @SuppressWarnings("unchecked")
     private static <T> T[] instancias(final int tamanho) {
@@ -184,13 +184,72 @@ public final class JStreams<T> implements JStream<T> {
 
     private <S> S aplicar(final Provedor<S> sucesso, final Provedor<S> outroCaso) {
 
-        Objects.requireNonNull(sucesso);
-
         if (presente()) {
             return sucesso.prover();
         }
 
         return outroCaso.prover();
+
+    }
+
+    private static class JStreamProxy<T> implements JStream<T> {
+
+        private final JStream<T> jStream;
+
+        private JStreamProxy(final JStream<T> jStream) {
+            this.jStream = jStream;
+        }
+
+        @Override
+        public <S> JStream<S> mapeamento(final Funcao<? super T, S> funcao) {
+            Objects.requireNonNull(funcao);
+            return new JStreamProxy<>(jStream.mapeamento(funcao));
+        }
+
+        @Override
+        public JStream<T> filtro(final Predicado<? super T> predicado) {
+            Objects.requireNonNull(predicado);
+            return new JStreamProxy<>(jStream.filtro(predicado));
+        }
+
+        @Override
+        public JOptional<T> reducao(final OperacaoBinaria<T> operacaoBinaria) {
+            Objects.requireNonNull(operacaoBinaria);
+            return jStream.reducao(operacaoBinaria);
+        }
+
+        @Override
+        public JOptional<T> primeiroValor() {
+            return jStream.primeiroValor();
+        }
+
+        @Override
+        public <A, R> R paraColecao(final Collector<? super T, A, R> collector) {
+            Objects.requireNonNull(collector);
+            return jStream.paraColecao(collector);
+        }
+
+        @Override
+        public boolean presente() {
+            return jStream.presente();
+        }
+
+        @Override
+        public boolean vazio() {
+            return jStream.vazio();
+        }
+
+        @Override
+        public boolean peloMenosUmCombina(final Predicado<? super T> predicado) {
+            Objects.requireNonNull(predicado);
+            return jStream.peloMenosUmCombina(predicado);
+        }
+
+        @Override
+        public boolean todosCombinam(final Predicado<? super T> predicado) {
+            Objects.requireNonNull(predicado);
+            return jStream.todosCombinam(predicado);
+        }
 
     }
 

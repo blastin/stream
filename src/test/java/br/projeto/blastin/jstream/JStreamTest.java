@@ -80,6 +80,20 @@ class JStreamTest {
     }
 
     @Test
+    void mapeandoComFuncaoNula() {
+        Assertions
+                .assertThrows(NullPointerException.class, () -> JStreams.nula().mapeamento(null));
+    }
+
+    @Test
+    void segundoMapeamentoComFuncaoNula() {
+
+        Assertions
+                .assertThrows(NullPointerException.class,
+                        () -> JStreams.de(1, 2).mapeamento(Integer::doubleValue).mapeamento(null));
+    }
+
+    @Test
     void mapeandoVazio() {
 
         final Double[] valores = {};
@@ -108,13 +122,28 @@ class JStreamTest {
     }
 
     @Test
-    void filtroNulo() {
+    void filtroStreamNula() {
 
         Assertions
                 .assertTrue(
                         JStreams
                                 .nula()
                                 .filtro(Objects::nonNull).vazio());
+
+    }
+
+    @Test
+    void filtroComPredicadoNulo() {
+        Assertions
+                .assertThrows(NullPointerException.class, () -> JStreams.nula().filtro(null));
+    }
+
+    @Test
+    void segundoFiltroComPredicadoNulo() {
+
+        Assertions
+                .assertThrows(NullPointerException.class,
+                        () -> JStreams.de(1, 2).filtro(integer -> integer > 1).filtro(null));
 
     }
 
@@ -200,6 +229,12 @@ class JStreamTest {
     }
 
     @Test
+    void todosCombinamComPredicadoNulo() {
+        Assertions
+                .assertThrows(NullPointerException.class, () -> JStreams.nula().todosCombinam(null));
+    }
+
+    @Test
     void combinacaoDeTodosParaStreamNula() {
 
         Assertions
@@ -219,6 +254,12 @@ class JStreamTest {
                                 .nula()
                                 .peloMenosUmCombina(o -> true));
 
+    }
+
+    @Test
+    void peloMenosUmCombinaComPredicadoNulo() {
+        Assertions
+                .assertThrows(NullPointerException.class, () -> JStreams.nula().peloMenosUmCombina(null));
     }
 
     @Test
@@ -282,6 +323,12 @@ class JStreamTest {
 
         Assertions.assertEquals(55, JStreams.de(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).reducao(Integer::sum).ou(0));
 
+    }
+
+    @Test
+    void reducaoComOperacaoNula() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> JStreams.de(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).reducao(null));
     }
 
     @Test
