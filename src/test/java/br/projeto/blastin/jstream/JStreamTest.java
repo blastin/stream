@@ -18,7 +18,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de((Object) null)
                                 .vazio()
                 );
@@ -30,7 +30,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .nula()
                                 .vazio()
                 );
@@ -40,7 +40,7 @@ class JStreamTest {
     @Test
     void primeiroValorDeStreamNula() {
         Assertions
-                .assertTrue(JStream.nula().primeiroValor().vazio());
+                .assertTrue(JStreams.nula().primeiroValor().vazio());
     }
 
     @Test
@@ -48,7 +48,7 @@ class JStreamTest {
 
         final Character[] valores = {};
 
-        final JOptional<Character> primeiroValor = JStream.de(valores).primeiroValor();
+        final JOptional<Character> primeiroValor = JStreams.de(valores).primeiroValor();
 
         Assertions
                 .assertTrue(primeiroValor.vazio());
@@ -62,7 +62,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(valores)
                                 .vazio()
                 );
@@ -74,7 +74,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .nula()
                                 .mapeamento(String::valueOf).vazio());
     }
@@ -86,7 +86,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(valores)
                                 .mapeamento(String::valueOf).vazio());
 
@@ -96,7 +96,7 @@ class JStreamTest {
     void mapeandoValor() {
 
         final Class<? extends Integer> classe =
-                JStream
+                JStreams
                         .de('A')
                         .mapeamento(Integer::valueOf)
                         .primeiroValor()
@@ -112,7 +112,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .nula()
                                 .filtro(Objects::nonNull).vazio());
 
@@ -125,7 +125,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(valores)
                                 .filtro(Objects::nonNull).vazio());
 
@@ -138,7 +138,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(valores)
                                 .filtro(numero -> numero > 5).vazio());
 
@@ -151,7 +151,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(valores)
                                 .filtro(numero -> numero > 2).presente());
 
@@ -163,7 +163,7 @@ class JStreamTest {
         final Integer[] valores = {0, 0, 1, 1, 2, 2};
 
         final Set<String> valoresString =
-                JStream
+                JStreams
                         .de(valores)
                         .filtro(numero -> numero > 1)
                         .mapeamento(String::valueOf)
@@ -177,7 +177,7 @@ class JStreamTest {
     void streamNulaParaColecaoSet() {
 
         final Set<String> valoresString =
-                JStream
+                JStreams
                         .de(0, 0, 1, 1, 2, 2)
                         .filtro(numero -> numero > 10)
                         .mapeamento(String::valueOf)
@@ -193,7 +193,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 2)
                                 .todosCombinam(numero -> numero > -1));
 
@@ -204,7 +204,7 @@ class JStreamTest {
 
         Assertions
                 .assertFalse(
-                        JStream
+                        JStreams
                                 .nula()
                                 .todosCombinam(o -> true));
 
@@ -215,7 +215,7 @@ class JStreamTest {
 
         Assertions
                 .assertFalse(
-                        JStream
+                        JStreams
                                 .nula()
                                 .peloMenosUmCombina(o -> true));
 
@@ -226,7 +226,7 @@ class JStreamTest {
 
         Assertions
                 .assertFalse(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 2)
                                 .todosCombinam(numero -> numero > 0));
 
@@ -238,19 +238,18 @@ class JStreamTest {
 
         Assertions
                 .assertFalse(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 2)
                                 .todosCombinam(numero -> numero > 2));
 
     }
-
 
     @Test
     void peloMenosUmCombina() {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 3)
                                 .peloMenosUmCombina(numero -> numero > 2));
 
@@ -261,7 +260,7 @@ class JStreamTest {
 
         Assertions
                 .assertTrue(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 3)
                                 .peloMenosUmCombina(numero -> numero > 0));
 
@@ -272,7 +271,7 @@ class JStreamTest {
 
         Assertions
                 .assertFalse(
-                        JStream
+                        JStreams
                                 .de(0, 0, 1, 1, 2, 3)
                                 .peloMenosUmCombina(numero -> numero > 3));
 
@@ -281,7 +280,7 @@ class JStreamTest {
     @Test
     void somandoValores() {
 
-        Assertions.assertEquals(55, JStream.de(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).reducao(Integer::sum).ou(0));
+        Assertions.assertEquals(55, JStreams.de(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).reducao(Integer::sum).ou(0));
 
     }
 
@@ -289,7 +288,7 @@ class JStreamTest {
     void concatenandoString() {
 
         final String reducao =
-                JStream
+                JStreams
                         .de("a", "b", "c", "d", "e", "f")
                         .reducao((a, b) -> a + b)
                         .ou("");
@@ -302,7 +301,7 @@ class JStreamTest {
     @Test
     void reducaoComStreamNula() {
 
-        Assertions.assertTrue(JStream.nula().reducao((a, b) -> null).vazio());
+        Assertions.assertTrue(JStreams.nula().reducao((a, b) -> null).vazio());
 
     }
 
@@ -312,7 +311,7 @@ class JStreamTest {
         final List<Integer> inteiros = List.of(1, 2);
 
         final Class<? extends Integer> inteiroClass =
-                JStream
+                JStreams
                         .de(inteiros)
                         .filtro(integer -> integer > 1)
                         .primeiroValor()
@@ -333,7 +332,7 @@ class JStreamTest {
         Assertions
                 .assertThrows(
                         NoSuchElementException.class,
-                        JStream
+                        JStreams
                                 .de(inteiros)
                                 .filtro(integer -> integer > 2)
                                 .primeiroValor()::obter
@@ -346,7 +345,7 @@ class JStreamTest {
 
         final AtomicBoolean status = new AtomicBoolean(false);
 
-        JStream
+        JStreams
                 .de(1.0, 2.0, 3.0, 4.0, 5.0, 5.5, 6.0)
                 .filtro(aDouble -> aDouble > 3.0)
                 .mapeamento(Double::intValue)
@@ -370,7 +369,7 @@ class JStreamTest {
 
         final List<Double> numeros = List.of(1.0, 2.0, 3.0, 4.0, 5.0, 5.5, 6.0);
 
-        JStream
+        JStreams
                 .de(numeros)
                 .filtro(aDouble -> aDouble > 3.0)
                 .mapeamento(Double::intValue)
