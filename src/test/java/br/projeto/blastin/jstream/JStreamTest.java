@@ -4,6 +4,7 @@ import br.projeto.blastin.joptional.JOptional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -185,7 +186,7 @@ class JStreamTest {
     }
 
     @Test
-    void todosCombinacam() {
+    void todosCombinam() {
 
 
         Assertions
@@ -197,7 +198,30 @@ class JStreamTest {
     }
 
     @Test
-    void todosNaoCombinaram() {
+    void combinacaoDeTodosParaStreamNula() {
+
+        Assertions
+                .assertFalse(
+                        JStream
+                                .nula()
+                                .todosCombinam(o -> true));
+
+    }
+
+    @Test
+    void combinacaoPeloMenosUmParaStreamNula() {
+
+        Assertions
+                .assertFalse(
+                        JStream
+                                .nula()
+                                .peloMenosUmCombina(o -> true));
+
+    }
+
+
+    @Test
+    void todosNaoCombinam() {
 
         Assertions
                 .assertFalse(
@@ -278,6 +302,24 @@ class JStreamTest {
     void reducaoComStreamNula() {
 
         Assertions.assertTrue(JStream.nula().reducao((a, b) -> null).vazio());
+
+    }
+
+
+    @Test
+    void colecaoInteiroParaStream() {
+
+        final List<Integer> inteiros = List.of(1, 2);
+
+        final Class<? extends Integer> inteiroClass =
+                JStream
+                        .de(inteiros)
+                        .primeiroValor()
+                        .ouExcessao(RuntimeException::new)
+                        .obter()
+                        .getClass();
+
+        Assertions.assertEquals(Integer.class, inteiroClass);
 
     }
 }

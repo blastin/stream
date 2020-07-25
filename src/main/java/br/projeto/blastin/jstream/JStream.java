@@ -6,6 +6,7 @@ import br.projeto.blastin.joptional.Predicado;
 import br.projeto.blastin.joptional.Provedor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collector;
 
@@ -24,6 +25,13 @@ public final class JStream<T> {
     @SafeVarargs
     public static <T> JStream<T> de(final T... t) {
         return new JStream<>(t, t.length);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> JStream<T> de(final Collection<T> colecao) {
+        Objects.requireNonNull(colecao);
+        final T[] ts = (T[]) colecao.toArray();
+        return new JStream<>(ts, ts.length);
     }
 
     @SuppressWarnings("unchecked")
