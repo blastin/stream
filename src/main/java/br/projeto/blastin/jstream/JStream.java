@@ -8,9 +8,13 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collector;
 
+/**
+ * @param <T> tipo generico da classe final
+ * @author Jefferson Lisboa < lisboa.jeff@gmail.com >
+ * @apiNote JStream é uma releitura básica da biblioteca stream. A proposta é estudar e desenvolver
+ * habilidades com a utilizao de interfaces para resolver o canivete <p> map, filter, reduce </p>
+ */
 public final class JStream<T> {
-
-    public static final JStream<?> JSTREAM_NULO = new JStream<>(null);
 
     public static <T> JStream<T> de(final T t) {
         return new JStream<>(t);
@@ -24,6 +28,13 @@ public final class JStream<T> {
     @SuppressWarnings("unchecked")
     public static <T> JStream<T> nula() {
         return (JStream<T>) JSTREAM_NULO;
+    }
+
+    private static final JStream<?> JSTREAM_NULO = new JStream<>(null);
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[] instancias(final int tamanho) {
+        return (T[]) new Object[tamanho];
     }
 
     private JStream(final T t) {
@@ -70,6 +81,55 @@ public final class JStream<T> {
 
     }
 
+    public JOptional<T> reducao(final OperacaoBinaria<T> operacaoBinaria) {
+
+        Objects.requireNonNull(operacaoBinaria);
+
+        if (presente()) {
+            return reduzir(operacaoBinaria);
+        }
+
+        return JOptional.nulo();
+
+    }
+
+    private JOptional<T> reduzir(final OperacaoBinaria<T> operacaoBinaria) {
+
+        T acumulo = ts[0];
+
+        for (int i = 1; i < tamanho; i++) {
+            acumulo = operacaoBinaria.operar(acumulo, ts[i]);
+        }
+
+        return JOptional.dePossivelNulo(acumulo);
+
+    }
+
+    public <A, R> R paraColecao(final Collector<? super T, A, R> collector) {
+        return Arrays.stream(ts, 0, tamanho).collect(collector);
+    }
+
+    public boolean presente() {
+        return ts != null && tamanho > 0;
+    }
+
+    public boolean vazio() {
+        return !presente();
+    }
+
+    public boolean peloMenosUmCombina(final Predicado<? super T> predicado) {
+        return combinacoes(predicado, integer -> integer > 0);
+    }
+
+    public boolean todosCombinam(final Predicado<? super T> predicado) {
+        return combinacoes(predicado, integer -> integer == tamanho);
+    }
+
+    public JOptional<T> primeiroValor() {
+        if (vazio()) return JOptional.nulo();
+        return JOptional.dePossivelNulo(ts[0]);
+    }
+
     private JStream<T> filtrar(final Predicado<? super T> predicado) {
 
         T[] tss = instancias(tamanho);
@@ -110,26 +170,6 @@ public final class JStream<T> {
 
     }
 
-    public <A, R> R paraColecao(final Collector<? super T, A, R> collector) {
-        return Arrays.stream(ts, 0, tamanho).collect(collector);
-    }
-
-    public boolean presente() {
-        return ts != null && tamanho > 0;
-    }
-
-    public boolean vazio() {
-        return !presente();
-    }
-
-    public boolean peloMenosUmCombina(final Predicado<? super T> predicado) {
-        return combinacoes(predicado, integer -> integer > 0);
-    }
-
-    public boolean todosCombinam(final Predicado<? super T> predicado) {
-        return combinacoes(predicado, integer -> integer == tamanho);
-    }
-
     private boolean combinacoes(final Predicado<? super T> predicado, final Predicado<Integer> predicadoCombinacao) {
 
         Objects.requireNonNull(predicado);
@@ -153,16 +193,6 @@ public final class JStream<T> {
 
         return quantidade;
 
-    }
-
-    public JOptional<T> primeiroValor() {
-        if (vazio()) return JOptional.nulo();
-        return JOptional.dePossivelNulo(ts[0]);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T[] instancias(final int tamanho) {
-        return (T[]) new Object[tamanho];
     }
 
 }

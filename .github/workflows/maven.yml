@@ -13,4 +13,4 @@ jobs:
           java-version: 14
           architecture: x64
       - name: Testar
-        run: mvn clean test
+        run: mvn clean -s optional/.github/settings.xml test

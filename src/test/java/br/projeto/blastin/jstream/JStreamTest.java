@@ -253,4 +253,25 @@ class JStreamTest {
 
     }
 
+    @Test
+    void somandoValores() {
+
+        Assertions.assertEquals(55, JStream.de(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).reducao(Integer::sum).ou(0));
+
+    }
+
+    @Test
+    void concatenandoString() {
+
+        final String reducao =
+                JStream
+                        .de("a", "b", "c", "d", "e", "f")
+                        .reducao((a, b) -> a + b)
+                        .ou("");
+
+        Assertions
+                .assertEquals("abcdef", reducao);
+
+    }
+
 }
