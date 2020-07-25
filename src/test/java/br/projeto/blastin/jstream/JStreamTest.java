@@ -274,4 +274,10 @@ class JStreamTest {
 
     }
 
+    @Test
+    void reducaoComStreamNula() {
+
+        Assertions.assertTrue(JStream.nula().reducao((a, b) -> null).vazio());
+
+    }
 }

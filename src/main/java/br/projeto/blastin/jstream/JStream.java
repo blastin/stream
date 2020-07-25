@@ -3,6 +3,7 @@ package br.projeto.blastin.jstream;
 import br.projeto.blastin.joptional.Funcao;
 import br.projeto.blastin.joptional.JOptional;
 import br.projeto.blastin.joptional.Predicado;
+import br.projeto.blastin.joptional.Provedor;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -59,50 +60,16 @@ public final class JStream<T> {
 
     private final int tamanho;
 
-    public <S> JStream<S> mapeamento(final Funcao<? super T, ? extends S> funcao) {
-
-        Objects.requireNonNull(funcao);
-
-        if (presente()) {
-            return mapear(funcao);
-        }
-
-        return nula();
-
+    public <S> JStream<S> mapeamento(final Funcao<? super T, S> funcao) {
+        return aplicar(() -> mapear(funcao), JStream::nula);
     }
 
     public JStream<T> filtro(final Predicado<? super T> predicado) {
-
-        if (presente()) {
-            return filtrar(predicado);
-        }
-
-        return nula();
-
+        return aplicar(() -> filtrar(predicado), JStream::nula);
     }
 
     public JOptional<T> reducao(final OperacaoBinaria<T> operacaoBinaria) {
-
-        Objects.requireNonNull(operacaoBinaria);
-
-        if (presente()) {
-            return reduzir(operacaoBinaria);
-        }
-
-        return JOptional.nulo();
-
-    }
-
-    private JOptional<T> reduzir(final OperacaoBinaria<T> operacaoBinaria) {
-
-        T acumulo = ts[0];
-
-        for (int i = 1; i < tamanho; i++) {
-            acumulo = operacaoBinaria.operar(acumulo, ts[i]);
-        }
-
-        return JOptional.dePossivelNulo(acumulo);
-
+        return aplicar(() -> reduzir(operacaoBinaria), JOptional::nulo);
     }
 
     public <A, R> R paraColecao(final Collector<? super T, A, R> collector) {
@@ -130,6 +97,36 @@ public final class JStream<T> {
         return JOptional.dePossivelNulo(ts[0]);
     }
 
+    private <S> S aplicar(final Provedor<S> sucesso, final Provedor<S> outroCaso) {
+
+        Objects.requireNonNull(sucesso);
+
+        if (presente()) {
+            return sucesso.prover();
+        }
+
+        return outroCaso.prover();
+
+    }
+
+    private <S> JStream<S> mapear(final Funcao<? super T, S> funcao) {
+
+        final S[] ss = instancias(tamanho);
+
+        int quantidadeMapeada = 0;
+
+        for (int i = 0; i < tamanho; i++) {
+
+            final S mapeado = funcao.aplicar(ts[i]);
+
+            if (mapeado != null) ss[quantidadeMapeada++] = mapeado;
+
+        }
+
+        return new JStream<>(ss, quantidadeMapeada);
+
+    }
+
     private JStream<T> filtrar(final Predicado<? super T> predicado) {
 
         T[] tss = instancias(tamanho);
@@ -152,21 +149,15 @@ public final class JStream<T> {
 
     }
 
-    private <S> JStream<S> mapear(final Funcao<? super T, ? extends S> funcao) {
+    private JOptional<T> reduzir(final OperacaoBinaria<T> operacaoBinaria) {
 
-        final S[] ss = instancias(tamanho);
+        T acumulo = ts[0];
 
-        int quantidadeMapeada = 0;
-
-        for (int i = 0; i < tamanho; i++) {
-
-            final S mapeado = funcao.aplicar(ts[i]);
-
-            if (mapeado != null) ss[quantidadeMapeada++] = mapeado;
-
+        for (int i = 1; i < tamanho; i++) {
+            acumulo = operacaoBinaria.operar(acumulo, ts[i]);
         }
 
-        return new JStream<>(ss, quantidadeMapeada);
+        return JOptional.dePossivelNulo(acumulo);
 
     }
 
