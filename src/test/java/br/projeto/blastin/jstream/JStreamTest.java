@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 class JStreamTest {
@@ -83,6 +84,11 @@ class JStreamTest {
     void mapeandoComFuncaoNula() {
         Assertions
                 .assertThrows(NullPointerException.class, () -> JStreams.nula().mapeamento(null));
+    }
+
+    @Test
+    void mapeandoComValorNulo() {
+        Assertions.assertEquals(0, JStreams.de("the smiths").mapeamento(s -> null).quantidade());
     }
 
     @Test
@@ -189,16 +195,16 @@ class JStreamTest {
     @Test
     void paraColecaoSet() {
 
-        final Integer[] valores = {0, 0, 1, 1, 2, 2};
+        final Integer[] valores = {0, 0, 1, 1, 2, 2, 3, 4, 5};
 
-        final Set<String> valoresString =
+        final String valor =
                 JStreams
                         .de(valores)
                         .filtro(numero -> numero > 1)
                         .mapeamento(String::valueOf)
-                        .paraColecao(Collectors.toSet());
+                        .paraColecao(Collectors.joining());
 
-        Assertions.assertEquals(1, valoresString.size());
+        Assertions.assertEquals("22345", valor);
 
     }
 
@@ -430,4 +436,32 @@ class JStreamTest {
 
     }
 
+    @Test
+    void quantidadeIgual5() {
+        Assertions
+                .assertEquals(5, JStreams.de(1, 2, 3, 4, 5).quantidade());
+    }
+
+    @Test
+    void paraCadaFoiChamado2Vezes() {
+
+        final AtomicInteger quantidade = new AtomicInteger(0);
+
+        JStreams
+                .de(1, 2, 3)
+                .filtro(integer -> integer > 1)
+                .paraCada(quantidade::addAndGet);
+
+        Assertions
+                .assertEquals(5, quantidade.get());
+
+    }
+
+    @Test
+    void paraCadaComConsumidorNulo() {
+
+        Assertions
+                .assertThrows(NullPointerException.class,
+                        () -> JStreams.de(1).paraCada(null));
+    }
 }

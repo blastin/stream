@@ -1,5 +1,6 @@
 package br.projeto.blastin.jstream;
 
+import br.projeto.blastin.joptional.Consumidor;
 import br.projeto.blastin.joptional.Funcao;
 import br.projeto.blastin.joptional.JOptional;
 import br.projeto.blastin.joptional.Predicado;
@@ -26,4 +27,8 @@ public interface JStream<T> {
 
     boolean todosCombinam(Predicado<? super T> predicado);
 
+    int quantidade();
+
+    void paraCada(final Consumidor<T> consumidor);
+    
 }

@@ -1,9 +1,6 @@
 package br.projeto.blastin.jstream;
 
-import br.projeto.blastin.joptional.Funcao;
-import br.projeto.blastin.joptional.JOptional;
-import br.projeto.blastin.joptional.Predicado;
-import br.projeto.blastin.joptional.Provedor;
+import br.projeto.blastin.joptional.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,7 +28,7 @@ public final class JStreams<T> implements JStream<T> {
     public static <T> JStream<T> de(final Collection<T> colecao) {
         Objects.requireNonNull(colecao);
         final T[] ts = (T[]) colecao.toArray();
-        return new JStreamProxy<>(new JStreams<>(ts, ts.length));
+        return new JStreamProxy<>(new JStreams<>(ts, colecao.size()));
     }
 
     @SuppressWarnings("unchecked")
@@ -70,17 +67,17 @@ public final class JStreams<T> implements JStream<T> {
 
     @Override
     public <S> JStream<S> mapeamento(final Funcao<? super T, S> funcao) {
-        return aplicar(() -> mapear(funcao), JStreams::nula);
+        return prover(() -> mapear(funcao), JStreams::nula);
     }
 
     @Override
     public JStream<T> filtro(final Predicado<? super T> predicado) {
-        return aplicar(() -> filtrar(predicado), JStreams::nula);
+        return prover(() -> filtrar(predicado), JStreams::nula);
     }
 
     @Override
     public JOptional<T> reducao(final OperacaoBinaria<T> operacaoBinaria) {
-        return aplicar(() -> reduzir(operacaoBinaria), JOptional::nulo);
+        return prover(() -> reduzir(operacaoBinaria), JOptional::nulo);
     }
 
     @Override
@@ -114,6 +111,20 @@ public final class JStreams<T> implements JStream<T> {
         return combinacoes(predicado, integer -> integer == tamanho);
     }
 
+    @Override
+    public int quantidade() {
+        return tamanho;
+    }
+
+    @Override
+    public void paraCada(final Consumidor<T> consumidor) {
+
+        for (int i = 0; i < tamanho; i++) {
+            consumidor.consumir(ts[i]);
+        }
+
+    }
+
     private <S> JStream<S> mapear(final Funcao<? super T, S> funcao) {
 
         final S[] ss = instancias(tamanho);
@@ -134,8 +145,6 @@ public final class JStreams<T> implements JStream<T> {
 
     private JStream<T> filtrar(final Predicado<? super T> predicado) {
 
-        T[] tss = instancias(tamanho);
-
         int filtrados = 0;
 
         for (int i = 0; i < tamanho; i++) {
@@ -143,14 +152,16 @@ public final class JStreams<T> implements JStream<T> {
             final T t = ts[i];
 
             if (predicado.teste(t)) {
-                tss[filtrados++] = t;
+                ts[filtrados++] = t;
+            } else {
+                ts[i] = null;
             }
 
         }
 
-        if (filtrados == 0) tss = instancias(0);
+        if (filtrados == 0) return nula();
 
-        return new JStreams<>(tss, filtrados);
+        return new JStreams<>(ts, filtrados);
 
     }
 
@@ -167,7 +178,7 @@ public final class JStreams<T> implements JStream<T> {
     }
 
     private boolean combinacoes(final Predicado<? super T> predicado, final Predicado<Integer> predicadoCombinacao) {
-        return aplicar(() -> predicadoCombinacao.teste(quantidadeCombinacao(predicado)), () -> false);
+        return prover(() -> predicadoCombinacao.teste(quantidadeCombinacao(predicado)), () -> false);
     }
 
     private int quantidadeCombinacao(final Predicado<? super T> predicado) {
@@ -182,13 +193,13 @@ public final class JStreams<T> implements JStream<T> {
 
     }
 
-    private <S> S aplicar(final Provedor<S> sucesso, final Provedor<S> outroCaso) {
+    private <S> S prover(final Provedor<S> sucesso, final Provedor<S> outroCaso) {
 
-        if (presente()) {
-            return sucesso.prover();
+        if (presente()) { // PREDICADO
+            return sucesso.prover(); // PROVENDO SUCESSO
         }
 
-        return outroCaso.prover();
+        return outroCaso.prover();  // PROVENDO OUTRO CASO
 
     }
 
@@ -249,6 +260,17 @@ public final class JStreams<T> implements JStream<T> {
         public boolean todosCombinam(final Predicado<? super T> predicado) {
             Objects.requireNonNull(predicado);
             return jStream.todosCombinam(predicado);
+        }
+
+        @Override
+        public int quantidade() {
+            return jStream.quantidade();
+        }
+
+        @Override
+        public void paraCada(final Consumidor<T> consumidor) {
+            Objects.requireNonNull(consumidor);
+            jStream.paraCada(consumidor);
         }
 
     }
